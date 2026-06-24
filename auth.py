@@ -11,23 +11,24 @@ from werkzeug.security import check_password_hash
 
 
 def is_logged_in() -> bool:
-    # Păcălim aplicația că suntem logați
-    st.session_state["logged_in"] = True
-    
-    # Îi dăm automat datele din Secrets fără să le mai verifice cu parola
-    users = st.secrets.get("users", {})
-    if users:
-        # Ia automat primul utilizator găsit în setările tale (demo)
-        username = list(users.keys())[0]
-        st.session_state["username"] = username
-        st.session_state["spreadsheet_id"] = users[username]["spreadsheet_id"]
-        st.session_state["restaurant_name"] = users[username].get("restaurant_name", "Demo")
-    
-    return True
+    return st.session_state.get("logged_in", False)
 
 
 def get_spreadsheet_id() -> str:
-    return st.session_state.get("spreadsheet_id", "")
+    sid = st.session_state.get("spreadsheet_id", "")
+    if not sid:
+        st.error(
+            "⚠️ **spreadsheet_id lipsește din sesiune.**\n\n"
+            "Verificați că în `secrets.toml` aveți exact formatul:\n"
+            "```toml\n"
+            "[users.numeutilizator]\n"
+            'password_hash = "pbkdf2:sha256:..."\n'
+            'spreadsheet_id = "1ABC...XYZ"\n'
+            'restaurant_name = "Numele Restaurantului"\n'
+            "```\n\n"
+            "Apoi deconectați-vă și reconectați-vă."
+        )
+    return sid
 
 
 def get_restaurant_name() -> str:
@@ -37,7 +38,6 @@ def get_restaurant_name() -> str:
 def logout():
     for key in ["logged_in", "spreadsheet_id", "restaurant_name", "username"]:
         st.session_state.pop(key, None)
-    # Invalidăm și cache-ul de date
     keys_to_delete = [k for k in st.session_state if k.startswith("sheet_cache_")]
     for k in keys_to_delete:
         del st.session_state[k]
@@ -47,12 +47,10 @@ def logout():
 def show_login_page():
     """Randează pagina de login. Apelați din app.py dacă nu e autentificat."""
 
-    # Layout centrat, Apple-style
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
         st.markdown("<br><br>", unsafe_allow_html=True)
 
-        # Logo / titlu
         st.markdown(
             """
             <div style='text-align:center; margin-bottom: 2rem;'>
@@ -76,9 +74,24 @@ def show_login_page():
         if submitted:
             _attempt_login(username.strip(), password)
 
+        # ── Debug helper: arată ce users există în secrets ──────────────
+        with st.expander("🔧 Debug secrets", expanded=False):
+            users = st.secrets.get("users", {})
+            if not users:
+                st.error("❌ Secțiunea `[users]` lipsește din secrets.toml!")
+            else:
+                st.success(f"✅ Utilizatori găsiți: {list(users.keys())}")
+                for uname, ucfg in users.items():
+                    sid = ucfg.get("spreadsheet_id", "")
+                    st.write(f"**{uname}**: spreadsheet_id = `{sid[:20]}...`" if sid else f"**{uname}**: ⚠️ spreadsheet_id LIPSEȘTE!")
+
 
 def _attempt_login(username: str, password: str):
     users = st.secrets.get("users", {})
+
+    if not users:
+        st.error("❌ Nu există utilizatori configurați în secrets.toml. Adăugați secțiunea `[users]`.")
+        return
 
     if username not in users:
         st.error("Utilizator sau parolă incorectă.")
@@ -87,12 +100,24 @@ def _attempt_login(username: str, password: str):
     user_cfg = users[username]
     stored_hash = user_cfg.get("password_hash", "")
 
+    if not stored_hash:
+        st.error(f"❌ `password_hash` lipsește pentru utilizatorul `{username}` în secrets.toml.")
+        return
+
     if not check_password_hash(stored_hash, password):
         st.error("Utilizator sau parolă incorectă.")
         return
 
+    spreadsheet_id = user_cfg.get("spreadsheet_id", "")
+    if not spreadsheet_id:
+        st.error(
+            f"❌ `spreadsheet_id` lipsește pentru utilizatorul `{username}` în secrets.toml.\n\n"
+            "Adăugați ID-ul Google Sheet-ului (găsiți în URL-ul sheet-ului, între `/d/` și `/edit`)."
+        )
+        return
+
     st.session_state["logged_in"] = True
     st.session_state["username"] = username
-    st.session_state["spreadsheet_id"] = user_cfg["spreadsheet_id"]
+    st.session_state["spreadsheet_id"] = spreadsheet_id
     st.session_state["restaurant_name"] = user_cfg.get("restaurant_name", username)
     st.rerun()

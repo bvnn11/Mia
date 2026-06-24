@@ -1,6 +1,5 @@
 """
 ui_helpers.py — componente UI reutilizabile, stil Apple alb/mov.
-Compatibil Streamlit 1.58+ (selectori actualizați).
 """
 
 import streamlit as st
@@ -20,50 +19,19 @@ ORANGE = "#FF9500"
 
 GLOBAL_CSS = f"""
 <style>
-/* ── Background alb forțat ── */
-.stApp, .stApp > div, [data-testid="stAppViewContainer"] {{
-    background-color: {WHITE} !important;
+/* Reset & base */
+.stApp {{
+    background: {WHITE};
 }}
 
-/* ── Tot textul să fie vizibil (negru/gri închis) ── */
-.stApp, .stApp p, .stApp span, .stApp div,
-.stMarkdown, .stMarkdown p, .stMarkdown span,
-h1, h2, h3, h4, h5, h6 {{
-    color: {TEXT_PRIMARY} !important;
-}}
-
-/* ── Titluri pagini ── */
-.stApp h1, .stApp h2, .stApp h3 {{
-    color: {TEXT_PRIMARY} !important;
-    font-weight: 700 !important;
-}}
-
-/* ── Sidebar ── */
-section[data-testid="stSidebar"],
-section[data-testid="stSidebar"] > div {{
-    background-color: {SURFACE} !important;
+/* Sidebar */
+section[data-testid="stSidebar"] {{
+    background: {SURFACE};
     border-right: 1px solid #E5E0FF;
 }}
 
-section[data-testid="stSidebar"] * {{
-    color: {TEXT_PRIMARY} !important;
-}}
-
-section[data-testid="stSidebar"] nav a,
-section[data-testid="stSidebar"] nav span {{
-    color: {TEXT_PRIMARY} !important;
-    font-weight: 500;
-}}
-
-section[data-testid="stSidebar"] nav a:hover {{
-    background: {PURPLE_LIGHT} !important;
-    color: {PURPLE} !important;
-    border-radius: 8px;
-}}
-
-/* Subtitluri din sidebar header */
 section[data-testid="stSidebar"] .stMarkdown p {{
-    color: {TEXT_SECONDARY} !important;
+    color: {TEXT_SECONDARY};
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -71,10 +39,9 @@ section[data-testid="stSidebar"] .stMarkdown p {{
     padding: 1rem 0 0.25rem;
 }}
 
-/* ── Butoane principale ── */
+/* Butoane principale */
 .stButton > button[kind="primary"] {{
-    background: {PURPLE} !important;
-    color: white !important;
+    background: {PURPLE};
     border: none;
     border-radius: 12px;
     font-weight: 600;
@@ -83,14 +50,14 @@ section[data-testid="stSidebar"] .stMarkdown p {{
     transition: opacity 0.15s;
 }}
 .stButton > button[kind="primary"]:hover {{
-    opacity: 0.85 !important;
-    background: {PURPLE} !important;
+    opacity: 0.85;
+    background: {PURPLE};
 }}
 
-/* ── Form submit ── */
+/* Form submit */
 .stFormSubmitButton > button {{
-    background: {PURPLE} !important;
-    color: white !important;
+    background: {PURPLE};
+    color: white;
     border: none;
     border-radius: 12px;
     font-weight: 600;
@@ -99,53 +66,41 @@ section[data-testid="stSidebar"] .stMarkdown p {{
     transition: opacity 0.15s;
 }}
 .stFormSubmitButton > button:hover {{
-    opacity: 0.85 !important;
-    background: {PURPLE} !important;
+    opacity: 0.85;
+    background: {PURPLE};
 }}
 
-/* ── Input fields ── */
+/* Input fields */
 .stTextInput > div > div > input,
 .stNumberInput > div > div > input,
+.stSelectbox > div > div,
 .stTextArea > div > div > textarea {{
     border-radius: 10px !important;
     border: 1.5px solid #E5E0FF !important;
     background: {WHITE} !important;
-    color: {TEXT_PRIMARY} !important;
 }}
 
-/* ── Selectbox ── */
-.stSelectbox > div > div {{
-    border-radius: 10px !important;
-    border: 1.5px solid #E5E0FF !important;
-    background: {WHITE} !important;
-    color: {TEXT_PRIMARY} !important;
-}}
-
-/* ── Metric cards ── */
+/* Metric cards */
 [data-testid="metric-container"] {{
-    background: {SURFACE} !important;
+    background: {SURFACE};
     border-radius: 14px;
     padding: 1rem 1.2rem;
     border: 1px solid #E5E0FF;
 }}
 
-[data-testid="metric-container"] * {{
-    color: {TEXT_PRIMARY} !important;
-}}
-
-/* ── Dataframe ── */
+/* Dataframe */
 .stDataFrame {{
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #E5E0FF;
 }}
 
-/* ── Alert boxes ── */
+/* Alert boxes */
 .stAlert {{
     border-radius: 12px;
 }}
 
-/* ── Ascunde menu hamburger în production ── */
+/* Nasconde il menu hamburger in production */
 #MainMenu {{ visibility: hidden; }}
 footer {{ visibility: hidden; }}
 </style>
@@ -158,20 +113,11 @@ def inject_css():
 
 
 def page_header(title: str, subtitle: str = ""):
-    """Header de pagină consistent — text vizibil garantat."""
-    st.markdown(
-        f"<h2 style='color:{TEXT_PRIMARY}; font-weight:700; margin-bottom:0.25rem;'>{title}</h2>",
-        unsafe_allow_html=True,
-    )
+    """Header de pagină consistent."""
+    st.markdown(f"## {title}")
     if subtitle:
-        st.markdown(
-            f"<p style='color:{TEXT_SECONDARY}; margin-top:0; margin-bottom:0; font-size:0.95rem;'>{subtitle}</p>",
-            unsafe_allow_html=True,
-        )
-    st.markdown(
-        f"<hr style='border:none; border-top:1px solid #E5E0FF; margin:0.75rem 0 1.5rem;'>",
-        unsafe_allow_html=True,
-    )
+        st.markdown(f"<p style='color:{TEXT_SECONDARY}; margin-top:-0.5rem; font-size:0.95rem;'>{subtitle}</p>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:none; border-top:1px solid #E5E0FF; margin:0.75rem 0 1.5rem;'>", unsafe_allow_html=True)
 
 
 def alert_stoc_minim(produse_sub_minim: list[dict]):

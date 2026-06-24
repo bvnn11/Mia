@@ -11,7 +11,19 @@ from werkzeug.security import check_password_hash
 
 
 def is_logged_in() -> bool:
-    return st.session_state.get("logged_in", False)
+    # Păcălim aplicația că suntem logați
+    st.session_state["logged_in"] = True
+    
+    # Îi dăm automat datele din Secrets fără să le mai verifice cu parola
+    users = st.secrets.get("users", {})
+    if users:
+        # Ia automat primul utilizator găsit în setările tale (demo)
+        username = list(users.keys())[0]
+        st.session_state["username"] = username
+        st.session_state["spreadsheet_id"] = users[username]["spreadsheet_id"]
+        st.session_state["restaurant_name"] = users[username].get("restaurant_name", "Demo")
+    
+    return True
 
 
 def get_spreadsheet_id() -> str:

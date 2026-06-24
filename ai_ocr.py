@@ -20,7 +20,7 @@ import streamlit as st
 logger = logging.getLogger(__name__)
 
 # ── Singura constantă de model — schimbați doar aici dacă e retras ──────────
-GEMINI_MODEL = "gemini-1.5-flash"
+GEMINI_MODEL = "gemini-2.5-flash"
 # Alternativă stabilă: "gemini-1.5-pro"
 # ────────────────────────────────────────────────────────────────────────────
 
